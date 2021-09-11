@@ -30,7 +30,7 @@
 
 class Persistency {
   private:
-    uint32_t presets_[8];
+    uint16_t presets_[8];
 
 
   public:

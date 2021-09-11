@@ -28,22 +28,35 @@ class Channel {
   private:
 
     uint pin_;
-    uint state_;
     uint length_;
     uint div_;
     uint step_;
     uint accumulator_;
+    uint state_;
+    bool isGate_;
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-    void _updateOutput () {
+    inline void updateOutput_ () {
       uint value = (state_ >> (step_ % 8)) & 1;
       digitalWrite(pin_, value == 1 ? HIGH : LOW);
+
+      #ifdef SHOW_STEP
+      display = state_ ^ (1 << (step_ % 8));
+      #endif // SHOW_STEP
+    }
+
+    //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+    inline void resync_ () {
+      step_ = (globalStep / div_) % length_;
     }
 
   public:
 
+    uint display;
+
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     Channel () {
+      isGate_      = false;
       length_      = 8;
       div_         = 1;
       state_       = 0;
@@ -58,6 +71,11 @@ class Channel {
     }
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+    void setAsGate() {
+      isGate_ = true;
+    }
+
+    //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void tickClock () {
       accumulator_ += 1;
       if (accumulator_ >= div_) {
@@ -66,12 +84,16 @@ class Channel {
         if (step_ >= length_) {
           step_ = 0;
         }
-        _updateOutput();
+        updateOutput_();
       }
     }
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void clockFallingEdge () {
+      #ifdef SHOW_STEP
+      display = state_;
+      #endif // SHOW_STEP
+      if (isGate_) return;
       digitalWrite(pin_, LOW);
     }
 
@@ -79,7 +101,7 @@ class Channel {
     void resetClock () {
       step_ = 0;
       accumulator_ = 0;
-      _updateOutput();
+      updateOutput_();
     }
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -96,9 +118,7 @@ class Channel {
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void setLength (uint length) {
       this->length_ = length;
-      if (step_ >= length) {
-        step_ = step_ % length;
-      }
+      resync_();
     }
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -109,6 +129,7 @@ class Channel {
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void setDiv (uint div) {
       this->div_ = div;
+      resync_();
     }
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄

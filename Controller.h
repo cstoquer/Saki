@@ -71,9 +71,11 @@ class Controller {
         // delay the clock for few cycles to wait for reset signal
         if (tick_ == 10) {
           if (resetRequested_) {
+            globalStep = 0;
             interface.resetChannels();
             resetRequested_ = false;
           } else {
+            if (++globalStep == 128) globalStep = 0;
             interface.clockChannels();
           }
         }

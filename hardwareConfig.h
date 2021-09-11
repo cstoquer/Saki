@@ -1,6 +1,8 @@
 #ifndef hardwareConfig_h
 #define hardwareConfig_h
 
+#define SHOW_STEP
+
 #define LEN_8_BUTTON 12
 #define LEN_0_BUTTON 13
 #define DIV_BUTTON   4

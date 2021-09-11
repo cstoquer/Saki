@@ -30,6 +30,12 @@
 #include "CommandButtons.h"
 #include "Channel.h"
 
+#ifdef SHOW_STEP
+  #define FALLING_EDGE_CHANNEL 8
+#else
+  #define FALLING_EDGE_CHANNEL 4
+#endif // SHOW_STEP
+
 enum Mode {
   PATTERN_EDITION,
   CHANNEL_SELECTION,
@@ -63,6 +69,11 @@ class Interface {
       channels[6].setup(CHANNEL_6);
       channels[7].setup(CHANNEL_7);
 
+      channels[4].setAsGate();
+      channels[5].setAsGate();
+      channels[6].setAsGate();
+      channels[7].setAsGate();
+
       commandButtons.setup();
       muxButtons.setup();
       display.setup();
@@ -76,6 +87,12 @@ class Interface {
       for (int i = 0; i < 8; ++i) {
         channels[i].tickClock();
       }
+
+      #ifdef SHOW_STEP
+      if (mode_ == PATTERN_EDITION) {
+        display.writeLED(channels[currentChannel_].display);
+      }
+      #endif // SHOW_STEP
     }
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -87,10 +104,15 @@ class Interface {
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void clockFallingEdge () {
-      // NOTA: only for the 4 first "trigger" channels.
-      for (int i = 0; i < 4; ++i) {
+      for (int i = 0; i < FALLING_EDGE_CHANNEL; ++i) {
         channels[i].clockFallingEdge();
       }
+
+      #ifdef SHOW_STEP
+      if (mode_ == PATTERN_EDITION) {
+        display.writeLED(channels[currentChannel_].getState());
+      }
+      #endif // SHOW_STEP
     }
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
