@@ -48,6 +48,7 @@ class Display {
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     void writeLED (uint value) {
+      value = value & 255;
       if (value == currentState_) {
         clean_ = true;
         return;

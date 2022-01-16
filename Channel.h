@@ -37,11 +37,11 @@ class Channel {
 
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     inline void updateOutput_ () {
-      uint value = (state_ >> (step_ % 8)) & 1;
+      uint value = (state_ >> (step_ % 16)) & 1;
       digitalWrite(pin_, value == 1 ? HIGH : LOW);
 
       #ifdef SHOW_STEP
-      display = state_ ^ (1 << (step_ % 8));
+      display = state_ ^ (1 << (step_ % 16));
       #endif // SHOW_STEP
     }
 
@@ -57,7 +57,7 @@ class Channel {
     //▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
     Channel () {
       isGate_      = false;
-      length_      = 8;
+      length_      = 16;
       div_         = 1;
       state_       = 0;
       step_        = 0;

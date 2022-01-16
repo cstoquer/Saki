@@ -3,8 +3,8 @@
 
 #define SHOW_STEP
 
-#define LEN_8_BUTTON 12
-#define LEN_0_BUTTON 13
+#define LEN_8_BUTTON 13
+#define LEN_0_BUTTON 12
 #define DIV_BUTTON   4
 #define CHAN_BUTTON  5
 

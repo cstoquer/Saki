@@ -90,7 +90,7 @@ class Interface {
 
       #ifdef SHOW_STEP
       if (mode_ == PATTERN_EDITION) {
-        display.writeLED(channels[currentChannel_].display);
+        display.writeLED(channels[currentChannel_].display >> pageOffset);
       }
       #endif // SHOW_STEP
     }
@@ -110,7 +110,7 @@ class Interface {
 
       #ifdef SHOW_STEP
       if (mode_ == PATTERN_EDITION) {
-        display.writeLED(channels[currentChannel_].getState());
+        display.writeLED(channels[currentChannel_].getState() >> pageOffset);
       }
       #endif // SHOW_STEP
     }
@@ -124,11 +124,13 @@ class Interface {
       if (commandButtons.len8.risingEdge) {
         mode_ = LENGTH_8_SELECTION;
         display.displayValue(channels[currentChannel_].getLength() - 9);
+        pageOffset = 8;
       }
  
       if (commandButtons.len0.risingEdge) {
         mode_ = LENGTH_0_SELECTION;
         display.displayValue(channels[currentChannel_].getLength() - 1);
+        pageOffset = 0;
       }
 
       if (commandButtons.divb.risingEdge) {
@@ -143,14 +145,14 @@ class Interface {
 
       if (commandButtons.fallingEdge) {
         mode_ = PATTERN_EDITION;
-        display.writeLED(channels[currentChannel_].getState());
+        display.writeLED(channels[currentChannel_].getState() >> pageOffset);
       }
 
       if (!muxButtons.pressed) return;
 
       switch (mode_) {
         case PATTERN_EDITION:
-          display.writeLED(channels[currentChannel_].flipStep(muxButtons.buttonId));
+          display.writeLED(channels[currentChannel_].flipStep(muxButtons.buttonId + pageOffset) >> pageOffset);
           break;
 
         case CHANNEL_SELECTION:
